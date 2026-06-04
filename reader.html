@@ -51,7 +51,7 @@
     background: color-mix(in srgb, var(--color-desk) 82%, transparent);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid transparent;
-    transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background-color var(--speed) var(--ease);
+    transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background-color var(--speed) var(--ease), opacity var(--speed) var(--ease);
   }
   .bar.is-hidden { transform: translateY(-110%); }
   .bar.is-scrolled { border-bottom-color: var(--color-rule); }
@@ -87,6 +87,7 @@
   .opener__eyebrow { font-size: .75rem; letter-spacing: .32em; text-transform: uppercase; color: var(--color-ink-soft); display: block; margin-bottom: .9rem; }
   .opener__title { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 9vw, 4rem); line-height: 1.02; letter-spacing: -.01em; }
   .opener__rule { width: 46px; height: 1px; background: var(--color-rule); border: 0; margin: 1.8rem auto 0; }
+  .opener__readtime { font-size: .75rem; letter-spacing: .32em; text-transform: uppercase; color: var(--color-ink-soft); display: block; margin-top: 1.2rem; }
 
   article { font-size: var(--reading-size); transition: font-size .25s var(--ease); }
   article p {
@@ -122,9 +123,11 @@
   .endmark { text-align: center; margin-top: 3.5rem; color: var(--color-ink-soft); }
   .endmark__sym { font-family: var(--font-display); font-size: 1.4rem; }
   .endmark__label { font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; margin-top: .8rem; }
-  .nextchap { display: inline-flex; align-items: center; gap: .5rem; margin-top: 2.4rem; padding: .8rem 1.3rem; border: 1px solid var(--color-rule); border-radius: 100px; font-size: .85rem; letter-spacing: .04em; color: var(--color-ink-soft); font-family: var(--font-body); text-decoration: none; transition: border-color .2s var(--ease), color .2s var(--ease); }
-  .nextchap:hover { border-color: var(--color-ink-soft); color: var(--color-ink); }
-  .nextchap span { color: var(--color-ink); font-weight: 500; }
+  .nextchap, .prevchap { display: inline-flex; align-items: center; gap: .5rem; margin-top: 2.4rem; padding: .8rem 1.3rem; border: 1px solid var(--color-rule); border-radius: 100px; font-size: .85rem; letter-spacing: .04em; color: var(--color-ink-soft); font-family: var(--font-body); text-decoration: none; transition: border-color .2s var(--ease), color .2s var(--ease); }
+  .nextchap:hover, .prevchap:hover { border-color: var(--color-ink-soft); color: var(--color-ink); }
+  .nextchap span, .prevchap span { color: var(--color-ink); font-weight: 500; }
+  .chap-nav { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center; }
+  .chap-nav .nextchap, .chap-nav .prevchap { margin-top: 0; }
 
   .scrim { position: fixed; inset: 0; z-index: 70; background: rgba(20,15,8,.32); opacity: 0; visibility: hidden; transition: opacity var(--speed) var(--ease), visibility var(--speed) var(--ease); }
   .scrim.is-open { opacity: 1; visibility: visible; }
@@ -173,6 +176,42 @@
   .stepper__val { font-family: var(--font-body); color: var(--color-ink-soft); font-size: .9rem; min-width: 4ch; text-align: center; }
 
   .panel__note { margin-top: 1rem; font-size: .8rem; line-height: 1.5; color: var(--color-ink-soft); border-top: 1px solid var(--color-rule); padding-top: 1.4rem; }
+
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  body.font-dyslexic article { font-family: 'OpenDyslexic', sans-serif; }
+
+  .panel__subnote { font-size: .78rem; line-height: 1.5; color: var(--color-ink-soft); margin-top: .45rem; }
+
+  .shortcuts { display: flex; flex-direction: column; gap: .45rem; }
+  .shortcut { display: flex; align-items: baseline; gap: .35rem; font-size: .78rem; color: var(--color-ink-soft); }
+  .shortcut kbd { font-family: var(--font-body); font-size: .7rem; background: color-mix(in srgb, var(--color-ink) 8%, transparent); border: 1px solid var(--color-rule); border-radius: 4px; padding: .1em .35em; color: var(--color-ink); }
+
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+    background: var(--color-page); border: 1px solid var(--color-rule);
+    color: var(--color-ink); font-family: var(--font-body);
+    padding: .55rem 1.1rem; border-radius: 100px;
+    font-size: .82rem; letter-spacing: .04em;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s var(--ease);
+    white-space: nowrap;
+  }
+  .toast.is-visible { opacity: 1; }
+
+  body.focus-mode {
+    background-color: color-mix(in srgb, var(--color-desk) 10%, var(--color-page));
+    background-image: none;
+  }
+  body.focus-mode::after { opacity: 0; }
+  body.focus-mode .bar { opacity: 0.1; pointer-events: none; }
 
   /* ── Mobile (≤ 479 px) ──────────────────────────────────────
      Baseline: 375 px (iPhone SE / 14 Pro). Every rule here is a
@@ -232,6 +271,7 @@
       <span class="opener__eyebrow" id="ch-eyebrow"></span>
       <h1 class="opener__title" id="ch-title"></h1>
       <hr class="opener__rule">
+      <span class="opener__readtime" id="ch-readtime"></span>
     </div>
 
     <article id="ch-article"></article>
@@ -274,8 +314,32 @@
     </div>
   </div>
 
+  <div class="field">
+    <span class="field__label">Accessibility</span>
+    <div class="seg">
+      <button id="toggleDyslexic" aria-pressed="false">OpenDyslexic</button>
+    </div>
+    <p class="panel__subnote">Typeface designed for easier reading with dyslexia</p>
+    <div class="seg" style="margin-top:.8rem">
+      <button id="toggleBionic" aria-pressed="false">Bionic Reading</button>
+    </div>
+    <p class="panel__subnote">Bolds the first half of each word to guide your eyes</p>
+  </div>
+
+  <div class="field">
+    <span class="field__label">Keyboard shortcuts</span>
+    <div class="shortcuts">
+      <div class="shortcut"><kbd>→</kbd> <kbd>L</kbd> <span>Next chapter</span></div>
+      <div class="shortcut"><kbd>←</kbd> <kbd>H</kbd> <span>Previous chapter</span></div>
+      <div class="shortcut"><kbd>T</kbd> <span>Cycle theme</span></div>
+      <div class="shortcut"><kbd>F</kbd> <span>Focus mode</span></div>
+    </div>
+  </div>
+
   <p class="panel__note">Your settings are saved to this browser and persist between visits. The theme also follows your device's dark-mode preference on first visit.</p>
 </aside>
+
+<div id="toast" class="toast" aria-live="polite"></div>
 
 <script>
   // ── Chapter manifest ───────────────────────────────────────
@@ -294,6 +358,13 @@
 
   const root = document.documentElement;
 
+  history.scrollRestoration = 'manual';
+
+  let currentChId = '';
+  let currentNext = null;
+  let currentPrev = null;
+  let saveScrollTimer;
+
   // ── Reading progress bar ────────────────────────────────────
   const fill = document.getElementById('progressFill');
   const bar  = document.getElementById('bar');
@@ -306,6 +377,10 @@
     if (y > lastY && y > 140) bar.classList.add('is-hidden');
     else bar.classList.remove('is-hidden');
     lastY = y;
+    clearTimeout(saveScrollTimer);
+    saveScrollTimer = setTimeout(() => {
+      if (currentChId) localStorage.setItem('tl-pos-' + currentChId, window.scrollY);
+    }, 300);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -318,6 +393,10 @@
   document.getElementById('closeSettings').addEventListener('click', closePanel);
   scrim.addEventListener('click', closePanel);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+  document.addEventListener('click', e => {
+    if (e.target.closest('.nextchap, .prevchap') && currentChId)
+      localStorage.removeItem('tl-pos-' + currentChId);
+  });
 
   // ── Theme switcher ──────────────────────────────────────────
   const themeBtns = document.querySelectorAll('[data-theme-set]');
@@ -363,6 +442,140 @@
   const savedLeading = localStorage.getItem('tl-leading');
   if (savedLeading) applyLeading(savedLeading);
 
+  // ── OpenDyslexic ────────────────────────────────────────────
+  const dyslexicBtn = document.getElementById('toggleDyslexic');
+  let dyslexicOn = localStorage.getItem('tl-dyslexic') === 'true';
+  function applyDyslexic(on) {
+    dyslexicOn = on;
+    document.body.classList.toggle('font-dyslexic', on);
+    dyslexicBtn.setAttribute('aria-pressed', String(on));
+    localStorage.setItem('tl-dyslexic', String(on));
+  }
+  dyslexicBtn.addEventListener('click', () => applyDyslexic(!dyslexicOn));
+  applyDyslexic(dyslexicOn);
+
+  // ── Bionic Reading ───────────────────────────────────────────
+  const bionicBtn = document.getElementById('toggleBionic');
+  let bionicOn = localStorage.getItem('tl-bionic') === 'true';
+  let _bionicOriginal = null;
+
+  function bionicWord(word) {
+    const m = word.match(/^([^a-zA-Z]*)([a-zA-Z]{2,})([^a-zA-Z]*)$/);
+    if (!m) return word;
+    const half = Math.ceil(m[2].length * 0.5);
+    return `${m[1]}<strong>${m[2].slice(0, half)}</strong>${m[2].slice(half)}${m[3]}`;
+  }
+
+  function applyBionicToElement(el) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        if (parent.closest('.endmark, .scenebreak')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = [];
+    let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(node => {
+      const html = node.textContent.split(/(\s+)/).map(chunk =>
+        /^\s+$/.test(chunk) ? chunk : bionicWord(chunk)
+      ).join('');
+      const span = document.createElement('span');
+      span.innerHTML = html;
+      node.parentNode.replaceChild(span, node);
+    });
+  }
+
+  function enableBionic() {
+    const art = document.getElementById('ch-article');
+    if (!art.textContent.trim() || _bionicOriginal !== null) return;
+    _bionicOriginal = art.innerHTML;
+    applyBionicToElement(art);
+  }
+
+  function disableBionic() {
+    const art = document.getElementById('ch-article');
+    if (_bionicOriginal !== null) {
+      art.innerHTML = _bionicOriginal;
+      _bionicOriginal = null;
+    }
+  }
+
+  function applyBionic(on) {
+    bionicOn = on;
+    bionicBtn.setAttribute('aria-pressed', String(on));
+    localStorage.setItem('tl-bionic', String(on));
+    if (on) enableBionic();
+    else disableBionic();
+  }
+
+  bionicBtn.addEventListener('click', () => applyBionic(!bionicOn));
+  applyBionic(bionicOn);
+
+  // ── Toast ────────────────────────────────────────────────────
+  const toastEl = document.getElementById('toast');
+  let toastTimer;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('is-visible'), 1500);
+  }
+
+  // ── Focus mode ───────────────────────────────────────────────
+  let focusMode = false;
+  function onMouseNearTop(e) {
+    if (e.clientY < 60) {
+      focusMode = false;
+      document.body.classList.remove('focus-mode');
+      document.removeEventListener('mousemove', onMouseNearTop);
+    }
+  }
+  function setFocusMode(on) {
+    focusMode = on;
+    document.body.classList.toggle('focus-mode', on);
+    if (on) document.addEventListener('mousemove', onMouseNearTop);
+    else     document.removeEventListener('mousemove', onMouseNearTop);
+  }
+
+  // ── Keyboard shortcuts ───────────────────────────────────────
+  const THEMES       = ['day', 'sepia', 'night'];
+  const THEME_LABELS = { day: 'Day', sepia: 'Sepia', night: 'Night' };
+  document.addEventListener('keydown', e => {
+    if (panel.classList.contains('is-open')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.closest('input, textarea, select, button, a, [contenteditable]')) return;
+    switch (e.key) {
+      case 'ArrowRight': case 'l': case 'L':
+        if (!currentNext) return;
+        e.preventDefault();
+        localStorage.removeItem('tl-pos-' + currentChId);
+        showToast('Next chapter →');
+        setTimeout(() => { location.href = 'reader.html?ch=' + currentNext.id; }, 300);
+        break;
+      case 'ArrowLeft': case 'h': case 'H':
+        if (!currentPrev) return;
+        e.preventDefault();
+        localStorage.removeItem('tl-pos-' + currentChId);
+        showToast('← Previous chapter');
+        setTimeout(() => { location.href = 'reader.html?ch=' + currentPrev.id; }, 300);
+        break;
+      case 't': case 'T': {
+        const cur  = root.getAttribute('data-theme') || 'day';
+        const next = THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length];
+        setTheme(next);
+        showToast('Theme: ' + THEME_LABELS[next]);
+        break;
+      }
+      case 'f': case 'F':
+        setFocusMode(!focusMode);
+        showToast(focusMode ? 'Focus on' : 'Focus off');
+        break;
+    }
+  });
+
   // ── Chapter loader ──────────────────────────────────────────
   // --- in the markdown renders as a scene break (· · ·) instead
   // of a plain <hr>, which matches the reader's visual convention.
@@ -373,9 +586,13 @@
   function buildEndmark(ch, prev, next) {
     let html = `<div class="endmark__sym">❦</div>
       <div class="endmark__label">End of ${ch.display}</div>`;
-    if (next) {
-      html += `<a href="reader.html?ch=${next.id}" class="nextchap">Next: <span>${next.title}</span></a>`;
-    } else {
+    if (prev || next) {
+      html += `<div class="chap-nav">`;
+      if (prev) html += `<a href="reader.html?ch=${prev.id}" class="prevchap">← Prev: <span>${prev.title}</span></a>`;
+      if (next) html += `<a href="reader.html?ch=${next.id}" class="nextchap">Next: <span>${next.title}</span></a>`;
+      html += `</div>`;
+    }
+    if (!next) {
       html += `<p class="endmark__label" style="margin-top:1.2rem">More chapters coming soon.</p>`;
     }
     return html;
@@ -389,6 +606,10 @@
     const ch     = CHAPTERS[Math.max(0, idx)];
     const prev   = CHAPTERS[idx - 1] ?? null;
     const next   = CHAPTERS[idx + 1] ?? null;
+
+    currentChId = chId;
+    currentNext = next;
+    currentPrev = prev;
 
     // Update all the text nodes that depend on which chapter this is
     document.title                                     = `${ch.title} — Resonance | Thec Claire`;
@@ -411,6 +632,20 @@
       article.innerHTML =
         marked.parse(body) +
         `<div class="endmark">${buildEndmark(ch, prev, next)}</div>`;
+
+      const words = article.innerText.trim().split(/\s+/).filter(w => w).length;
+      const mins  = Math.max(1, Math.ceil(words / 200));
+      document.getElementById('ch-readtime').textContent = `~ ${mins} min read`;
+
+      localStorage.setItem('tl-read-' + chId, '1');
+
+      _bionicOriginal = null;
+      if (bionicOn) enableBionic();
+
+      requestAnimationFrame(() => {
+        const saved = parseInt(localStorage.getItem('tl-pos-' + chId), 10);
+        if (saved) window.scrollTo({ top: saved, behavior: 'instant' });
+      });
 
     } catch (err) {
       // Most likely cause: opened from file:// instead of a server.

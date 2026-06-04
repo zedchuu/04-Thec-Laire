@@ -223,6 +223,17 @@
 
     .ch-status--available { color: var(--color-accent); }
 
+    a.chapter-row.is-read .ch-title::after {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      background: var(--color-accent);
+      border-radius: 50%;
+      margin-left: 0.5rem;
+      vertical-align: 0.1em;
+    }
+
     /* ── Footer ──────────────────────────────────────────────── */
 
     footer {
@@ -370,14 +381,20 @@
     function setTheme(name) {
       root.setAttribute('data-theme', name);
       themeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeSet === name)));
+      localStorage.setItem('tl-theme', name);
     }
 
     themeBtns.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeSet)));
 
-    // Apply device preference on first load. data-theme="day" on <html>
-    // is the fallback for browsers that don't run JS or where the OS
-    // reports no preference.
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('night');
+    // Restore saved theme; fall back to OS preference, then day.
+    const savedTheme = localStorage.getItem('tl-theme');
+    if (savedTheme) setTheme(savedTheme);
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('night');
+
+    document.querySelectorAll('a.chapter-row').forEach(a => {
+      const id = new URL(a.href).searchParams.get('ch');
+      if (id && localStorage.getItem('tl-read-' + id)) a.classList.add('is-read');
+    });
   </script>
 
 </body>
