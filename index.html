@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resonance | Thec Claire</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="base.css">
+
+  <style>
+    /* ── Homepage-specific styles ───────────────────────────────
+       No hex colour values here — everything reads from the tokens
+       in base.css. If you need a new colour, add a variable there.
+       ────────────────────────────────────────────────────────── */
+
+    body {
+      background: var(--color-desk);
+      color: var(--color-ink);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background-color var(--speed) var(--ease), color var(--speed) var(--ease);
+    }
+
+    /* Decorative grain texture — the same overlay used on the reader.
+       --grain-opacity is 0 in night mode, so it disappears there
+       automatically without any JavaScript. */
+    body::after {
+      content: "";
+      position: fixed; inset: 0; z-index: 9999;
+      pointer-events: none;
+      opacity: var(--grain-opacity);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      transition: opacity var(--speed) var(--ease);
+    }
+
+    /* ── Site header ─────────────────────────────────────────── */
+
+    .site-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem clamp(1.5rem, 5vw, 3rem);
+      border-bottom: 1px solid var(--color-rule);
+      transition: border-color var(--speed) var(--ease);
+    }
+
+    .site-name {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink);
+      text-decoration: none;
+      transition: color 0.2s var(--ease);
+    }
+    .site-name:hover { color: var(--color-accent); }
+
+    /* Theme switcher — three swatch buttons in the header corner.
+       The <button> carries the accessible name via aria-label so the
+       decorative swatch <span> can be aria-hidden. Placing the label
+       on the button (not a wrapping div) means screen readers announce
+       "Day theme, button, pressed" — all the info a user needs. */
+    .theme-switcher {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .theme-btn {
+      appearance: none;
+      border: 2px solid transparent;
+      background: transparent;
+      padding: 2px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: border-color 0.2s var(--ease);
+    }
+    /* aria-pressed="true" is the semantic pressed state. The border
+       is its visual reflection. Using an ARIA attribute rather than
+       a CSS class means assistive technology gets the state directly
+       from the HTML — no CSS introspection required. */
+    .theme-btn[aria-pressed="true"] { border-color: var(--color-accent); }
+
+    /* Swatch chip — fixed preview colours, not theme-driven.
+       These three hex values are the only ones outside base.css;
+       they are decorative previews of each theme's page colour,
+       not semantic design tokens. */
+    .swatch {
+      display: block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,.18);
+      pointer-events: none;
+    }
+    .swatch--day   { background: #fbf8f1; }
+    .swatch--sepia { background: #f3e7cd; }
+    .swatch--night { background: #1d1a16; }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+
+    main {
+      width: 100%;
+      max-width: 580px;
+      padding: 4rem 1.5rem 6rem;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .hero__label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--color-ink-soft);
+      margin-bottom: 0.75rem;
+      transition: color var(--speed) var(--ease);
+    }
+
+    /* clamp() scales the title between a min and max size based on
+       viewport width — so it looks right on both a phone and a wide
+       monitor without a media query. */
+    .hero__title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 10vw, 3.5rem);
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-ink);
+      line-height: 1;
+      transition: color var(--speed) var(--ease);
+    }
+
+    .hero__rule {
+      width: 48px;
+      height: 1px;
+      background: var(--color-rule);
+      border: 0;
+      margin: 1.5rem auto;
+      transition: background-color var(--speed) var(--ease);
+    }
+
+    .hero__desc {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--color-ink-soft);
+      font-style: italic;
+      transition: color var(--speed) var(--ease);
+    }
+
+    /* ── Chapter list ────────────────────────────────────────── */
+
+    .chapter-list { list-style: none; }
+
+    /* Shared row layout — applies to both <a> (available) and
+       <span> (coming soon). Keeping one rule for both means visual
+       consistency comes from the HTML structure, not duplicated CSS. */
+    .chapter-row {
+      display: flex;
+      align-items: baseline;
+      padding: 0.95rem 0.25rem;
+      border-bottom: 1px solid var(--color-rule);
+      transition: border-color var(--speed) var(--ease);
+    }
+
+    /* <a> rows: interactive, hoverable */
+    a.chapter-row {
+      text-decoration: none;
+      color: var(--color-ink-soft);
+      transition:
+        color 0.2s var(--ease),
+        border-color var(--speed) var(--ease);
+    }
+    a.chapter-row:hover { color: var(--color-ink); }
+
+    /* <span> rows: coming-soon chapters. Not <a href="#"> because
+       a link that goes nowhere is misleading — screen readers announce
+       it as a link and keyboard users expect navigation to happen.
+       opacity < 1 is WCAG-exempt for inactive/disabled UI elements. */
+    span.chapter-row {
+      color: var(--color-ink-soft);
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .ch-number {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: var(--color-ink-soft);
+      min-width: 2.8rem;
+      transition: color var(--speed) var(--ease);
+    }
+
+    .ch-title {
+      flex: 1;
+      font-size: 0.975rem;
+    }
+
+    .ch-status {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink-soft);
+      transition: color var(--speed) var(--ease);
+    }
+
+    .ch-status--available { color: var(--color-accent); }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+
+    footer {
+      margin-top: auto;
+      padding: 2rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--color-ink-soft);
+      text-align: center;
+      transition: color var(--speed) var(--ease);
+    }
+
+    /* ── Mobile (≤ 479 px) ────────────────────────────────────
+       Baseline: 375 px. Overrides only — base styles handle most
+       cases already via rem units and clamp().
+       ────────────────────────────────────────────────────────── */
+    @media (max-width: 479px) {
+      body { overflow-x: hidden; }
+
+      /* Tighten header so the logo and swatches have more breathing
+         room without wasting space on wide side padding */
+      .site-header { padding-left: 1rem; padding-right: 1rem; }
+
+      /* Theme swatch buttons: expand tap area to 44 × 44 px.
+         The visible swatch stays 18 px — only the clickable zone grows. */
+      .theme-btn { width: 44px; height: 44px; }
+
+      /* Chapter rows already reach ~48 px via padding — no change
+         needed, but ensure nothing clips on the edges */
+      .chapter-row { padding-left: 0; padding-right: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- First element in <body> — keyboard users can skip the header
+       and jump straight to the chapter list without tabbing through
+       the site name and theme buttons. -->
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <a href="index.html" class="site-name">Thec Claire</a>
+
+    <!-- role="group" + aria-label groups the three buttons so a
+         screen reader announces "Colour theme, group" before reading
+         each button — context before content. -->
+    <div class="theme-switcher" role="group" aria-label="Colour theme">
+      <button class="theme-btn" data-theme-set="day"   aria-pressed="true"  aria-label="Day theme">
+        <span class="swatch swatch--day"   aria-hidden="true"></span>
+      </button>
+      <button class="theme-btn" data-theme-set="sepia" aria-pressed="false" aria-label="Sepia theme">
+        <span class="swatch swatch--sepia" aria-hidden="true"></span>
+      </button>
+      <button class="theme-btn" data-theme-set="night" aria-pressed="false" aria-label="Night theme">
+        <span class="swatch swatch--night" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="hero">
+      <span class="hero__label">A Web Novel</span>
+      <h1 class="hero__title">Resonance</h1>
+      <!-- aria-hidden: the <hr> is decorative spacing, not a
+           structural section break that a screen reader needs to
+           announce. -->
+      <hr class="hero__rule" aria-hidden="true">
+      <p class="hero__desc">
+        A story of shadows, forgotten names, and the things that persist
+        long after the world has moved on. Enter at your own risk.
+      </p>
+    </div>
+
+    <ul class="chapter-list" aria-label="Chapters">
+      <li>
+        <a href="reader.html?ch=chapter1-weird" class="chapter-row">
+          <span class="ch-number">001</span>
+          <span class="ch-title">Weird</span>
+          <span class="ch-status ch-status--available">Read</span>
+        </a>
+      </li>
+      <li>
+        <a href="reader.html?ch=chapter2-weird-too" class="chapter-row">
+          <span class="ch-number">002</span>
+          <span class="ch-title">Weird Too</span>
+          <span class="ch-status ch-status--available">Read</span>
+        </a>
+      </li>
+      <li>
+        <a href="reader.html?ch=chapter3-1-4-months-in" class="chapter-row">
+          <span class="ch-number">003(1)</span>
+          <span class="ch-title">4 Months In</span>
+          <span class="ch-status ch-status--available">Read</span>
+        </a>
+      </li>
+      <li>
+        <a href="reader.html?ch=chapter3-2-4-months-in" class="chapter-row">
+          <span class="ch-number">003(2)</span>
+          <span class="ch-title">4 Months In (cont.)</span>
+          <span class="ch-status ch-status--available">Read</span>
+        </a>
+      </li>
+      <li>
+        <a href="reader.html?ch=chapter4-rabbit" class="chapter-row">
+          <span class="ch-number">004</span>
+          <span class="ch-title">Rabbit</span>
+          <span class="ch-status ch-status--available">Read</span>
+        </a>
+      </li>
+      <li>
+        <a href="reader.html?ch=chapter5-lies" class="chapter-row">
+          <span class="ch-number">005</span>
+          <span class="ch-title">Lies</span>
+          <span class="ch-status ch-status--available">Read</span>
+        </a>
+      </li>
+      <li>
+        <a href="reader.html?ch=chapter6-gary" class="chapter-row">
+          <span class="ch-number">006</span>
+          <span class="ch-title">Gary</span>
+          <span class="ch-status ch-status--available">Read</span>
+        </a>
+      </li>
+      <li>
+        <a href="reader.html?ch=chapter7-peat" class="chapter-row">
+          <span class="ch-number">007</span>
+          <span class="ch-title">PEAT</span>
+          <span class="ch-status ch-status--available">Read</span>
+        </a>
+      </li>
+    </ul>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 &nbsp;&middot;&nbsp; Thec Claire</p>
+  </footer>
+
+  <script>
+    const root = document.documentElement;
+    const themeBtns = document.querySelectorAll('[data-theme-set]');
+
+    // Identical logic to reader.html — same function signature, same
+    // aria-pressed toggle. One source of truth for *what* a theme is
+    // (base.css); one pattern for *switching* it (this function).
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      themeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeSet === name)));
+    }
+
+    themeBtns.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeSet)));
+
+    // Apply device preference on first load. data-theme="day" on <html>
+    // is the fallback for browsers that don't run JS or where the OS
+    // reports no preference.
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('night');
+  </script>
+
+</body>
+</html>

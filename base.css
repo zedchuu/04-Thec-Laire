@@ -1,0 +1,109 @@
+/* ============================================================
+   BASE.CSS — design tokens + accessibility baseline
+   Linked by every page. No page-specific rules live here.
+   If you find yourself writing a hex value outside this file,
+   add a variable here instead.
+   ============================================================ */
+
+/* Universal box-sizing reset — border and padding are included
+   in an element's declared width, not added on top of it. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+/* ── Design tokens ──────────────────────────────────────────
+   The ONLY place in the project where actual colour hex values
+   appear. Swapping a theme = swapping ~8 variables here.
+   Everything else reads from these names, never from literals.
+   ────────────────────────────────────────────────────────── */
+:root {
+  --font-body:    "Literata", Georgia, "Times New Roman", serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --ease:  cubic-bezier(0.22, 1, 0.36, 1);
+  --speed: 0.45s;
+}
+
+[data-theme="day"] {
+  --color-desk:     #e9e3d6;
+  --color-page:     #fbf8f1;
+  --color-ink:      #26221c;
+  --color-ink-soft: #6f6657;
+  --color-accent:   #9a5b34;
+  --color-rule:     #ddd3c0;
+  --page-shadow:    0 1px 2px rgba(60,45,25,.05), 0 18px 50px -25px rgba(60,45,25,.28);
+  --grain-opacity:  .035;
+}
+
+[data-theme="sepia"] {
+  --color-desk:     #ddcfb2;
+  --color-page:     #f3e7cd;
+  --color-ink:      #463722;
+  --color-ink-soft: #7d6845;
+  --color-accent:   #9c5a2a;
+  --color-rule:     #d9c79f;
+  --page-shadow:    0 1px 2px rgba(70,45,15,.06), 0 18px 50px -25px rgba(70,45,15,.35);
+  --grain-opacity:  .045;
+}
+
+/* Night: warm dark, never pure black on white. #e6ddcd on #14120f
+   is ~13:1 contrast — well above WCAG AA (4.5:1 required). Pure
+   white on pure black looks harsher and causes halation for some
+   readers with dyslexia or migraines. */
+[data-theme="night"] {
+  --color-desk:     #14120f;
+  --color-page:     #1d1a16;
+  --color-ink:      #e6ddcd;
+  --color-ink-soft: #9c9183;
+  --color-accent:   #d49a6a;
+  --color-rule:     #322d26;
+  --page-shadow:    none;
+  --grain-opacity:  0;
+}
+
+/* ── Accessibility baseline ─────────────────────────────────
+   These rules must apply site-wide, so they live here and
+   nowhere else.
+   ────────────────────────────────────────────────────────── */
+
+/* Skip-to-content: hidden off-screen until focused. Without
+   this, keyboard/screen-reader users must tab through every
+   header element before reaching the page content on every
+   single page load. The link snaps into view on :focus so it
+   is visible when it matters, invisible when it is not. */
+.skip {
+  position: absolute;
+  left: 0;
+  top: -100px;
+  background: var(--color-accent);
+  color: #fff;
+  padding: .6rem 1rem;
+  z-index: 10000;
+  border-radius: 0 0 6px 0;
+  font-family: var(--font-body);
+  letter-spacing: .02em;
+  text-decoration: none;
+}
+.skip:focus { top: 0; }
+
+/* :focus-visible shows the ring for keyboard navigation only —
+   mouse users don't see an outline on click. Browsers that don't
+   support :focus-visible fall back gracefully to :focus. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Hard off-switch for all motion. Users with vestibular disorders
+   can be made physically ill by animation; !important ensures no
+   component-level transition accidentally overrides this. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

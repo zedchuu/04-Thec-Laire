@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resonance | Thec Claire</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="base.css">
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<style>
+  /* Reading-specific layout tokens. Colour, font, and timing
+     tokens live in base.css — the one source of truth for theming. */
+  :root {
+    --reading-size: 1.1875rem;
+    --reading-leading: 1.62;
+    --measure: 80ch;
+  }
+
+  body {
+    background: var(--color-desk);
+    background-image: radial-gradient(120% 80% at 50% -10%, rgba(255,255,255,.10), transparent 60%);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-optical-sizing: auto;
+    line-height: var(--reading-leading);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background-color var(--speed) var(--ease), color var(--speed) var(--ease);
+  }
+
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: 9999;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    transition: opacity var(--speed) var(--ease);
+  }
+
+  .progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 60; background: transparent; }
+  .progress__fill { height: 100%; width: 0%; background: var(--color-accent); transition: width .1s linear; }
+
+  .bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .85rem clamp(1rem, 4vw, 2rem);
+    background: color-mix(in srgb, var(--color-desk) 82%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid transparent;
+    transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background-color var(--speed) var(--ease);
+  }
+  .bar.is-hidden { transform: translateY(-110%); }
+  .bar.is-scrolled { border-bottom-color: var(--color-rule); }
+  .bar__title { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; letter-spacing: .01em; display: flex; align-items: baseline; gap: .55rem; }
+  .bar__title small { font-family: var(--font-body); font-weight: 400; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+  .bar__actions { display: flex; align-items: center; gap: 1rem; }
+  .bar__home { font-family: var(--font-display); font-size: .75rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); text-decoration: none; transition: color .2s var(--ease); }
+  .bar__home:hover { color: var(--color-ink); }
+
+  .iconbtn {
+    appearance: none; border: 1px solid var(--color-rule);
+    background: transparent; color: var(--color-ink);
+    width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer;
+    transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
+  }
+  .iconbtn:hover { background: color-mix(in srgb, var(--color-ink) 7%, transparent); }
+  .iconbtn svg { width: 20px; height: 20px; }
+
+  main { padding: 7.5rem clamp(1.1rem, 5vw, 2rem) 8rem; }
+
+  .page {
+    max-width: var(--measure);
+    margin: 0 auto;
+    background: var(--color-page);
+    box-shadow: var(--page-shadow);
+    border-radius: 4px;
+    padding: clamp(2rem, 6vw, 4.5rem) clamp(1.4rem, 6vw, 4rem);
+    transition: background-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+  }
+
+  .opener { text-align: center; margin-bottom: 3rem; }
+  .opener__eyebrow { font-size: .75rem; letter-spacing: .32em; text-transform: uppercase; color: var(--color-ink-soft); display: block; margin-bottom: .9rem; }
+  .opener__title { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 9vw, 4rem); line-height: 1.02; letter-spacing: -.01em; }
+  .opener__rule { width: 46px; height: 1px; background: var(--color-rule); border: 0; margin: 1.8rem auto 0; }
+
+  article { font-size: var(--reading-size); transition: font-size .25s var(--ease); }
+  article p {
+    text-indent: 1.4em;
+    margin-top: .15em;
+    text-wrap: pretty;
+    hanging-punctuation: first;
+  }
+  .opener + p { text-indent: 0; }
+
+  /* drop cap on the first paragraph. text-transform renders the first
+     glyph as a capital (book convention) without altering the text. */
+  article > p:first-of-type::first-letter {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-transform: uppercase;
+    float: left;
+    font-size: 3.4em;
+    line-height: .76;
+    padding: .06em .12em 0 0;
+    color: var(--color-accent);
+  }
+
+  /* a neutral scene break (no invented title) */
+  .scenebreak { text-align: center; color: var(--color-rule); font-family: var(--font-display); font-size: 1.1rem; margin: 2.6rem 0; letter-spacing: .3em; }
+
+  /* stacked rapid-fire dialogue keeps the manuscript's line rhythm */
+  .stack { text-indent: 0; }
+  .stack br { content: ""; }
+
+  article em { font-style: italic; }
+
+  .endmark { text-align: center; margin-top: 3.5rem; color: var(--color-ink-soft); }
+  .endmark__sym { font-family: var(--font-display); font-size: 1.4rem; }
+  .endmark__label { font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; margin-top: .8rem; }
+  .nextchap { display: inline-flex; align-items: center; gap: .5rem; margin-top: 2.4rem; padding: .8rem 1.3rem; border: 1px solid var(--color-rule); border-radius: 100px; font-size: .85rem; letter-spacing: .04em; color: var(--color-ink-soft); font-family: var(--font-body); text-decoration: none; transition: border-color .2s var(--ease), color .2s var(--ease); }
+  .nextchap:hover { border-color: var(--color-ink-soft); color: var(--color-ink); }
+  .nextchap span { color: var(--color-ink); font-weight: 500; }
+
+  .scrim { position: fixed; inset: 0; z-index: 70; background: rgba(20,15,8,.32); opacity: 0; visibility: hidden; transition: opacity var(--speed) var(--ease), visibility var(--speed) var(--ease); }
+  .scrim.is-open { opacity: 1; visibility: visible; }
+
+  .panel {
+    position: fixed; z-index: 80; right: 0; top: 0; bottom: 0;
+    width: min(360px, 100%);
+    background: var(--color-page);
+    border-left: 1px solid var(--color-rule);
+    padding: 1.6rem clamp(1.2rem, 5vw, 1.8rem);
+    transform: translateX(100%);
+    transition: transform var(--speed) var(--ease), background-color var(--speed) var(--ease);
+    overflow-y: auto;
+  }
+  .panel.is-open { transform: translateX(0); }
+  .panel__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  .panel__head h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.3rem; }
+
+  .field { margin-bottom: 2.1rem; }
+  .field__label { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--color-ink-soft); margin-bottom: .8rem; display: block; }
+
+  .seg { display: flex; gap: 6px; }
+  .seg button {
+    flex: 1; appearance: none; cursor: pointer;
+    border: 1px solid var(--color-rule); background: transparent;
+    color: var(--color-ink); font-family: var(--font-body);
+    padding: .7rem .4rem; border-radius: 9px; font-size: .9rem;
+    transition: all .2s var(--ease);
+  }
+  .seg button:hover { border-color: var(--color-ink-soft); }
+  .seg button[aria-pressed="true"] { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+  [data-theme="night"] .seg button[aria-pressed="true"] { color: #1d1a16; }
+
+  .seg--theme button { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+  .swatch { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); }
+  .swatch--day   { background: #fbf8f1; }
+  .swatch--sepia { background: #f3e7cd; }
+  .swatch--night { background: #1d1a16; }
+
+  .stepper { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .stepper button { appearance: none; cursor: pointer; width: 52px; height: 44px; border: 1px solid var(--color-rule); background: transparent; color: var(--color-ink); border-radius: 9px; font-family: var(--font-display); transition: all .2s var(--ease); }
+  .stepper button:hover:not(:disabled) { border-color: var(--color-ink-soft); }
+  .stepper button:disabled { opacity: .35; cursor: not-allowed; }
+  .stepper button.minus { font-size: 1rem; }
+  .stepper button.plus  { font-size: 1.5rem; }
+  .stepper__val { font-family: var(--font-body); color: var(--color-ink-soft); font-size: .9rem; min-width: 4ch; text-align: center; }
+
+  .panel__note { margin-top: 1rem; font-size: .8rem; line-height: 1.5; color: var(--color-ink-soft); border-top: 1px solid var(--color-rule); padding-top: 1.4rem; }
+
+  /* ── Mobile (≤ 479 px) ──────────────────────────────────────
+     Baseline: 375 px (iPhone SE / 14 Pro). Every rule here is a
+     targeted override — the base styles already do a lot of the
+     heavy lifting via clamp() and relative units.
+     ────────────────────────────────────────────────────────── */
+  @media (max-width: 479px) {
+    /* Stop any oversized element from creating horizontal scroll */
+    body { overflow-x: hidden; }
+
+    /* Bar: the chapter label is redundant on mobile — the opener
+       heading directly below already shows it. Hiding it prevents
+       "Thec Claire … 4 Months In · Chapter 3, Part 1 … ⚙" from
+       cramming into 375 px. Bar becomes: [Home] ————— [⚙] */
+    .bar__title { display: none; }
+
+    /* Touch target: WCAG 2.5.5 recommends 44 × 44 px minimum.
+       The icon stays 20 px; the extra area is padding. */
+    .iconbtn { width: 44px; height: 44px; }
+
+    /* Settings panel: full-width drawer on phones — 360 px on a
+       375 px screen leaves only a 15 px sliver of scrim showing,
+       which looks unintentional rather than deliberate. */
+    .panel { width: 100%; }
+
+    /* Compensate for the shorter bar (no chapter label row) */
+    main { padding-top: 6rem; }
+
+    /* Prevent rare long unbroken words in story text from pushing
+       the layout wider than the viewport. */
+    article { overflow-wrap: break-word; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#story">Skip to story</a>
+
+<div class="progress" aria-hidden="true"><div class="progress__fill" id="progressFill"></div></div>
+
+<header class="bar" id="bar">
+  <a href="index.html" class="bar__home">Thec Claire</a>
+  <div class="bar__actions">
+    <div class="bar__title"><small id="bar-title"></small> <span id="bar-chapter"></span></div>
+    <button class="iconbtn" id="openSettings" aria-label="Reading settings" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h7M15 17h5"/>
+        <circle cx="16" cy="7" r="2" fill="var(--color-page)"/><circle cx="8" cy="12" r="2" fill="var(--color-page)"/><circle cx="13" cy="17" r="2" fill="var(--color-page)"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="page" id="story">
+    <div class="opener">
+      <span class="opener__eyebrow" id="ch-eyebrow"></span>
+      <h1 class="opener__title" id="ch-title"></h1>
+      <hr class="opener__rule">
+    </div>
+
+    <article id="ch-article"></article>
+  </div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-label="Reading settings" aria-hidden="true">
+  <div class="panel__head">
+    <h2>Reading</h2>
+    <button class="iconbtn" id="closeSettings" aria-label="Close settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="field">
+    <span class="field__label">Theme</span>
+    <div class="seg seg--theme" role="group" aria-label="Theme">
+      <button data-theme-set="day"   aria-pressed="true"><span class="swatch swatch--day"></span>Day</button>
+      <button data-theme-set="sepia" aria-pressed="false"><span class="swatch swatch--sepia"></span>Sepia</button>
+      <button data-theme-set="night" aria-pressed="false"><span class="swatch swatch--night"></span>Night</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="field__label">Text size</span>
+    <div class="stepper">
+      <button class="minus" id="sizeDown" aria-label="Decrease text size">A</button>
+      <span class="stepper__val" id="sizeVal">Medium</span>
+      <button class="plus" id="sizeUp" aria-label="Increase text size">A</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="field__label">Line spacing</span>
+    <div class="seg" role="group" aria-label="Line spacing">
+      <button data-leading="1.45" aria-pressed="false">Tight</button>
+      <button data-leading="1.62" aria-pressed="true">Normal</button>
+      <button data-leading="1.85" aria-pressed="false">Relaxed</button>
+    </div>
+  </div>
+
+  <p class="panel__note">Your settings are saved to this browser and persist between visits. The theme also follows your device's dark-mode preference on first visit.</p>
+</aside>
+
+<script>
+  // ── Chapter manifest ───────────────────────────────────────
+  // Add a chapter here when it's ready. The id must match the
+  // filename in "arc 1/" (without the .md extension).
+  const CHAPTERS = [
+    { id: 'chapter1-weird',          num: '1',   display: 'Chapter One',          title: 'Weird'               },
+    { id: 'chapter2-weird-too',      num: '2',   display: 'Chapter Two',          title: 'Weird Too'           },
+    { id: 'chapter3-1-4-months-in',  num: '3.1', display: 'Chapter 3, Part 1',    title: '4 Months In'         },
+    { id: 'chapter3-2-4-months-in',  num: '3.2', display: 'Chapter 3, Part 2',    title: '4 Months In (cont.)' },
+    { id: 'chapter4-rabbit',         num: '4',   display: 'Chapter Four',         title: 'Rabbit'              },
+    { id: 'chapter5-lies',           num: '5',   display: 'Chapter Five',         title: 'Lies'                },
+    { id: 'chapter6-gary',           num: '6',   display: 'Chapter Six',          title: 'Gary'                },
+    { id: 'chapter7-peat',           num: '7',   display: 'Chapter Seven',        title: 'PEAT'                },
+  ];
+
+  const root = document.documentElement;
+
+  // ── Reading progress bar ────────────────────────────────────
+  const fill = document.getElementById('progressFill');
+  const bar  = document.getElementById('bar');
+  let lastY  = 0;
+  function onScroll() {
+    const y   = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    fill.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+    bar.classList.toggle('is-scrolled', y > 10);
+    if (y > lastY && y > 140) bar.classList.add('is-hidden');
+    else bar.classList.remove('is-hidden');
+    lastY = y;
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // ── Settings panel ──────────────────────────────────────────
+  const panel = document.getElementById('panel');
+  const scrim = document.getElementById('scrim');
+  function openPanel()  { panel.classList.add('is-open'); scrim.classList.add('is-open'); panel.setAttribute('aria-hidden', 'false'); }
+  function closePanel() { panel.classList.remove('is-open'); scrim.classList.remove('is-open'); panel.setAttribute('aria-hidden', 'true'); }
+  document.getElementById('openSettings').addEventListener('click', openPanel);
+  document.getElementById('closeSettings').addEventListener('click', closePanel);
+  scrim.addEventListener('click', closePanel);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+  // ── Theme switcher ──────────────────────────────────────────
+  const themeBtns = document.querySelectorAll('[data-theme-set]');
+  function setTheme(name) {
+    root.setAttribute('data-theme', name);
+    themeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeSet === name)));
+    localStorage.setItem('tl-theme', name);
+  }
+  themeBtns.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeSet)));
+  // Restore saved theme; fall back to OS preference, then day
+  const savedTheme = localStorage.getItem('tl-theme');
+  if (savedTheme) setTheme(savedTheme);
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('night');
+
+  // ── Text size ───────────────────────────────────────────────
+  const sizes     = [1.0, 1.0938, 1.1875, 1.3125, 1.4375];
+  const sizeNames = ['Small', 'Cozy', 'Medium', 'Large', 'X-Large'];
+  let sizeIdx = 2;
+  const sizeVal  = document.getElementById('sizeVal');
+  const sizeUp   = document.getElementById('sizeUp');
+  const sizeDown = document.getElementById('sizeDown');
+  function applySize() {
+    root.style.setProperty('--reading-size', sizes[sizeIdx] + 'rem');
+    sizeVal.textContent  = sizeNames[sizeIdx];
+    sizeDown.disabled    = sizeIdx === 0;
+    sizeUp.disabled      = sizeIdx === sizes.length - 1;
+    localStorage.setItem('tl-size', sizeIdx);
+  }
+  sizeUp.addEventListener('click',   () => { if (sizeIdx < sizes.length - 1) { sizeIdx++; applySize(); } });
+  sizeDown.addEventListener('click', () => { if (sizeIdx > 0)               { sizeIdx--; applySize(); } });
+  const savedSize = localStorage.getItem('tl-size');
+  if (savedSize !== null) sizeIdx = parseInt(savedSize, 10);
+  applySize();
+
+  // ── Line spacing ────────────────────────────────────────────
+  const leadBtns = document.querySelectorAll('[data-leading]');
+  function applyLeading(value) {
+    root.style.setProperty('--reading-leading', value);
+    leadBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.leading === value)));
+    localStorage.setItem('tl-leading', value);
+  }
+  leadBtns.forEach(b => b.addEventListener('click', () => applyLeading(b.dataset.leading)));
+  const savedLeading = localStorage.getItem('tl-leading');
+  if (savedLeading) applyLeading(savedLeading);
+
+  // ── Chapter loader ──────────────────────────────────────────
+  // --- in the markdown renders as a scene break (· · ·) instead
+  // of a plain <hr>, which matches the reader's visual convention.
+  const renderer = new marked.Renderer();
+  renderer.hr = () => '<div class="scenebreak" aria-hidden="true">· · ·</div>';
+  marked.use({ renderer, breaks: false });
+
+  function buildEndmark(ch, prev, next) {
+    let html = `<div class="endmark__sym">❦</div>
+      <div class="endmark__label">End of ${ch.display}</div>`;
+    if (next) {
+      html += `<a href="reader.html?ch=${next.id}" class="nextchap">Next: <span>${next.title}</span></a>`;
+    } else {
+      html += `<p class="endmark__label" style="margin-top:1.2rem">More chapters coming soon.</p>`;
+    }
+    return html;
+  }
+
+  async function loadChapter() {
+    const params = new URLSearchParams(location.search);
+    const chId   = params.get('ch') || CHAPTERS[0].id;
+    const idx    = CHAPTERS.findIndex(c => c.id === chId);
+    // Fall back gracefully if the ?ch= value isn't in the manifest
+    const ch     = CHAPTERS[Math.max(0, idx)];
+    const prev   = CHAPTERS[idx - 1] ?? null;
+    const next   = CHAPTERS[idx + 1] ?? null;
+
+    // Update all the text nodes that depend on which chapter this is
+    document.title                                     = `${ch.title} — Resonance | Thec Claire`;
+    document.getElementById('bar-title').textContent   = ch.title;
+    document.getElementById('bar-chapter').textContent = ch.display;
+    document.getElementById('ch-eyebrow').textContent  = ch.display;
+    document.getElementById('ch-title').textContent    = ch.title;
+
+    const article = document.getElementById('ch-article');
+
+    try {
+      const res = await fetch(`arc 1/${ch.id}.md`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const md = await res.text();
+
+      // The first line is "# Chapter N - Title" — already shown in
+      // the opener, so strip it before parsing the rest.
+      const body = md.replace(/^#[^\n]+\n+/, '').trim();
+
+      article.innerHTML =
+        marked.parse(body) +
+        `<div class="endmark">${buildEndmark(ch, prev, next)}</div>`;
+
+    } catch (err) {
+      // Most likely cause: opened from file:// instead of a server.
+      article.innerHTML = `
+        <p style="color:var(--color-accent)">Could not load chapter.</p>
+        <p>This page uses <code>fetch()</code> to load content, which
+        browsers block when opening files directly from disk. Run a
+        local server instead:</p>
+        <pre style="margin-top:1rem;font-size:.85rem;opacity:.7">python -m http.server 8000</pre>
+        <p style="margin-top:.75rem">Then open
+        <code>http://localhost:8000/reader.html?ch=${ch.id}</code></p>`;
+    }
+  }
+
+  loadChapter();
+</script>
+</body>
+</html>
