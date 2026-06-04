@@ -1,3 +1,4 @@
+<!-- © 2026 Thec Claire. All rights reserved. Do not reproduce without permission. -->
 # Chapter 6 - Gary
 
 Im cying inside. No way.. no way I have to eat my own poo.. thats disgusting .. 

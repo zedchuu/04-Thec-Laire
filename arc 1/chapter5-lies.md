@@ -1,3 +1,4 @@
+<!-- © 2026 Thec Claire. All rights reserved. Do not reproduce without permission. -->
 # Chapter 5 - Lies
 
 I wished I can become a rabbit right now. Because this will be much2 easier. 

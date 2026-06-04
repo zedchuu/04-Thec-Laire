@@ -1,3 +1,4 @@
+<!-- © 2026 Thec Claire. All rights reserved. Do not reproduce without permission. -->
 # Chapter 3.1 - 4 Months in
 
 It's been four months since Lily joined the orphanage. I thought she'd be someone I chat with once in a while, I mean she was quiet. Emphasis on was because man was i wrong. I was wrong about most of what I thought she was.

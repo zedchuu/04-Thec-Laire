@@ -1,3 +1,4 @@
+<!-- © 2026 Thec Claire. All rights reserved. Do not reproduce without permission. -->
 # Chapter 4 - Rabbit
 
 "what?" He asked. Guess I was staring longer than usual.

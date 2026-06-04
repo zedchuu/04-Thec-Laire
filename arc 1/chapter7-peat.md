@@ -1,3 +1,4 @@
+<!-- © 2026 Thec Claire. All rights reserved. Do not reproduce without permission. -->
 # Chapter 7 - PEAT
 
 "Woohoo omg i feel so better.. i never feel this good!" Gary exclaimed while hopping. 

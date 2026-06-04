@@ -1,3 +1,4 @@
+<!-- © 2026 Thec Claire. All rights reserved. Do not reproduce without permission. -->
 # Chapter 2 - Weird too
 
 He's about a year older than me, but why does it feels like he's way older?

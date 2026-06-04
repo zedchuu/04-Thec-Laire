@@ -1,3 +1,4 @@
+<!-- © 2026 Thec Claire. All rights reserved. Do not reproduce without permission. -->
 # Chapter 3.2 - 4 Months in
 
 After the day we talked, we had snow duties together. I was paired together with him and i was scared honestly. Is he watching me still? Will he keep watching me? He won't decide to use that shovel on me. Hopefully not. I try to talk more to him, because even though im still annoyed he laughed at my voice crack the day before, he still didn't really made fun of me and even when he did, he always did it in a funny way so i ended up giggling. Again, how does his brain worked that quick. I really need to know. Ugh.
